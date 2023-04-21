@@ -1,0 +1,52 @@
+[1/11] Performing build step for 'bootloader'
+[1/1] cd /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader/esp-idf/esptool_py && /home/anh/.espressif/python_env/idf5.1_py3.10_env/bin/python /home/anh/ProgramFile/esp32-idf/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader/bootloader.bin
+Bootloader binary size 0x30c0 bytes. 0x4f40 bytes (62%) free.
+[2/9] Building CXX object esp-idf/commandline/CMakeFiles/__idf_commandline.dir/commandline.cpp.obj
+FAILED: esp-idf/commandline/CMakeFiles/__idf_commandline.dir/commandline.cpp.obj 
+/home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-g++ -DESP_PLATFORM -DIDF_VER=\"v5.1-dev-4726-gdf9310ada2\" -DSOC_MMU_PAGE_SIZE=CONFIG_MMU_PAGE_SIZE -D_GNU_SOURCE -D_POSIX_READER_WRITER_LOCKS -I/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/config -I/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/newlib/platform_include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/freertos/FreeRTOS-Kernel/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/freertos/FreeRTOS-Kernel/portable/riscv/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/freertos/esp_additions/include/freertos -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/freertos/esp_additions/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/freertos/esp_additions/arch/riscv/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_hw_support/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_hw_support/include/soc -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_hw_support/include/soc/esp32c3 -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_hw_support/port/esp32c3/. -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_hw_support/port/esp32c3/private_include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/heap/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/soc/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/soc/esp32c3 -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/soc/esp32c3/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/hal/esp32c3/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/hal/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/hal/platform_port/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_rom/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_rom/include/esp32c3 -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_rom/esp32c3 -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_common/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_system/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_system/port/soc -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_system/port/include/riscv -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_system/port/include/private -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/riscv/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/include/apps -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/include/apps/sntp -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/lwip/src/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/port/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/port/freertos/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/port/esp32xx/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/port/esp32xx/include/arch -march=rv32imc_zicsr_zifencei  -fdiagnostics-color=always -ffunction-sections -fdata-sections -Wall -Werror=all -Wno-error=unused-function -Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-enum-conversion -gdwarf-4 -ggdb -nostartfiles -Og -fmacro-prefix-map=/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3=. -fmacro-prefix-map=/home/anh/ProgramFile/esp32-idf/esp-idf=/IDF -fstrict-volatile-bitfields -fno-jump-tables -fno-tree-switch-conversion -DconfigENABLE_FREERTOS_DEBUG_OCDAWARE=1 -std=gnu++20 -fno-exceptions -fno-rtti -MD -MT esp-idf/commandline/CMakeFiles/__idf_commandline.dir/commandline.cpp.obj -MF esp-idf/commandline/CMakeFiles/__idf_commandline.dir/commandline.cpp.obj.d -o esp-idf/commandline/CMakeFiles/__idf_commandline.dir/commandline.cpp.obj -c /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:48:24: error: 'cli_command_t' was not declared in this scope; did you mean 'cli_cmd_t'?
+   48 | void (*pevent_handler)(cli_command_t command);
+      |                        ^~~~~~~~~~~~~
+      |                        cli_cmd_t
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:67:6: error: variable or field 'commandline_register_handler' declared void
+   67 | void commandline_register_handler(void (*pfunction)(cli_command_t command)){
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:67:42: error: 'pfunction' was not declared in this scope
+   67 | void commandline_register_handler(void (*pfunction)(cli_command_t command)){
+      |                                          ^~~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:67:53: error: 'cli_command_t' was not declared in this scope; did you mean 'cli_cmd_t'?
+   67 | void commandline_register_handler(void (*pfunction)(cli_command_t command)){
+      |                                                     ^~~~~~~~~~~~~
+      |                                                     cli_cmd_t
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp: In function 'cli_err_t json_get_object(char*, cli_json_t*, char*)':
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:76:25: warning: unused variable 'pend' [-Wunused-variable]
+   76 |         char *pkstart, *pend, *pvstart;
+      |                         ^~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp: At global scope:
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:162:38: error: 'cli_err_t json_release_object' redeclared as different kind of entity
+  162 | static cli_err_t json_release_object(json_t *json){
+      |                                      ^~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:60:18: note: previous declaration 'cli_err_t json_release_object(cli_json_t*)'
+   60 | static cli_err_t json_release_object(cli_json_t *json);
+      |                  ^~~~~~~~~~~~~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:162:38: error: 'json_t' was not declared in this scope
+  162 | static cli_err_t json_release_object(json_t *json){
+      |                                      ^~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:162:46: error: 'json' was not declared in this scope
+  162 | static cli_err_t json_release_object(json_t *json){
+      |                                              ^~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp: In function 'cli_err_t cli_parse_packet(char*, cli_packet_t*)':
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:184:13: warning: unused variable 'src_len' [-Wunused-variable]
+  184 |         int src_len = strlen(src_cpy);
+      |             ^~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:185:13: warning: unused variable 'ivstart' [-Wunused-variable]
+  185 |         int ivstart = 0, cmd_len = 0;
+      |             ^~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp: At global scope:
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:60:18: warning: 'cli_err_t json_release_object(cli_json_t*)' declared 'static' but never defined [-Wunused-function]
+   60 | static cli_err_t json_release_object(cli_json_t *json);
+      |                  ^~~~~~~~~~~~~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:71:18: warning: 'cli_err_t json_get_object(char*, cli_json_t*, char*)' defined but not used [-Wunused-function]
+   71 | static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
+      |                  ^~~~~~~~~~~~~~~
+ninja: build stopped: subcommand failed.

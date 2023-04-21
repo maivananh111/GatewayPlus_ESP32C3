@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/CMakeFiles/bootloader
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/CMakeFiles/bootloader.rule
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/CMakeFiles/bootloader-complete.rule
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
