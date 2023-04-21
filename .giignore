@@ -1,5 +1,5 @@
-/build
-/.git
+build/
+.git/
 LICENSE
 .cproject
 .project
