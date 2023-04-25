@@ -83,7 +83,7 @@ static void WiFi_Event_Handler(void* arg, esp_event_base_t event_base, int32_t e
     }
 }
 
-void WiFi_STA_Connect(char *SSID, char *PASS, wifi_auth_mode_t auth){
+void WiFi_STA_Connect(char *ssid, char *pass, wifi_auth_mode_t auth){
 	WiFi_Event_Group = xEventGroupCreate();
 
     ESP_ERROR_CHECK(esp_netif_init());
@@ -102,15 +102,12 @@ void WiFi_STA_Connect(char *SSID, char *PASS, wifi_auth_mode_t auth){
 	esp_wifi_set_ps(WIFI_PS_NONE);
 
     wifi_config_t wifi_config = {0};
-    memcpy(wifi_config.sta.ssid, SSID, strlen(SSID));
-    memcpy(wifi_config.sta.password, PASS, strlen(PASS));
+    memcpy(wifi_config.sta.ssid, ssid, strlen(ssid));
 	wifi_config.sta.threshold.authmode = auth;
 	wifi_config.sta.channel = 1;
 
-	if(!strcmp(PASS, "*") != 0) memcpy(wifi_config.sta.password, PASS, strlen(PASS));
-	else {
-		wifi_config.sta.threshold.authmode = WIFI_AUTH_OPEN;
-	}
+	if(pass != NULL) memcpy(wifi_config.sta.password, pass, strlen(pass));
+	else wifi_config.sta.threshold.authmode = WIFI_AUTH_OPEN;
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
@@ -121,11 +118,11 @@ void WiFi_STA_Connect(char *SSID, char *PASS, wifi_auth_mode_t auth){
     EventBits_t bits = xEventGroupWaitBits(WiFi_Event_Group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
 
     if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGI(TAG, "Connected to ap SSID: %s password: %s", SSID, PASS);
+        ESP_LOGI(TAG, "Connected to ap SSID: %s password: %s", ssid, pass);
         WiFi_State = WIFI_CONNECTED;
     }
     else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGE(TAG, "Failed to connect to SSID: %s, password: %s", SSID, PASS);
+        ESP_LOGE(TAG, "Failed to connect to SSID: %s, password: %s", ssid, pass);
         WiFi_State = WIFI_CONNECT_FAILED;
     }
     else {
@@ -165,14 +162,14 @@ esp_netif_t *WiFi_STA_get_netif(void){
     return netif;
 }
 
-esp_err_t WiFi_STA_Set_IPV4(char *LocalIP, char *NetMask, char *DefaultGateWay){
+esp_err_t WiFi_STA_Set_IPV4(wifi_ipinfo_t *info){
 	esp_netif_ip_info_t ip_info = {0};
 	if(netif){
 		memset(&ip_info, 0, sizeof(esp_netif_ip_info_t));
 		esp_netif_dhcpc_stop(netif);
-        ip_info.ip.addr = esp_ip4addr_aton((const char *)LocalIP);
-        ip_info.netmask.addr = esp_ip4addr_aton((const char *)NetMask);
-        ip_info.gw.addr = esp_ip4addr_aton((const char *)DefaultGateWay);
+        ip_info.ip.addr = esp_ip4addr_aton((const char *)info->ip);
+        ip_info.netmask.addr = esp_ip4addr_aton((const char *)info->netmask);
+        ip_info.gw.addr = esp_ip4addr_aton((const char *)info->gateway);
         esp_err_t err = esp_netif_set_ip_info(netif, &ip_info);
 	    if (err != ESP_OK) {
 	        ESP_LOGE(TAG, "Failed to set station IP");
@@ -187,7 +184,7 @@ esp_err_t WiFi_STA_Set_IPDHCP(void){
 	if(netif){
 		esp_err_t err = esp_netif_dhcpc_start(netif);
 	    if (err != ESP_OK) {
-	        ESP_LOGE(TAG, "Failed to start dhcp client.");
+	        ESP_LOGE(TAG, "Failed to start dhcp.");
 	        return err;
 	    }
 	    return ESP_OK;
@@ -195,16 +192,33 @@ esp_err_t WiFi_STA_Set_IPDHCP(void){
 	return ESP_FAIL;
 }
 
-char *LocalIP(void){
+esp_err_t WiFi_STA_Get_IPInfo(wifi_ipinfo_t *info){
 	if(WiFi_State == WIFI_CONNECTED){
 		esp_netif_ip_info_t IP_info_t = {0};
-		char *buf;
-		buf = malloc(16*sizeof(char));
+
+		if(info->ip != NULL) free(info->ip);
+		if(info->netmask != NULL) free(info->netmask);
+		if(info->gateway != NULL) free(info->gateway);
+
+		info->ip      = (char *)malloc(16*sizeof(char));
+		info->netmask = (char *)malloc(16*sizeof(char));
+		info->gateway = (char *)malloc(16*sizeof(char));
+
 		esp_netif_get_ip_info(netif, &IP_info_t);
-		esp_ip4addr_ntoa(&IP_info_t.ip, (char *)buf, 16);
-		return (char *)buf;
+		esp_ip4addr_ntoa(&IP_info_t.ip, info->ip, 16);
+		esp_ip4addr_ntoa(&IP_info_t.netmask, info->netmask, 16);
+		esp_ip4addr_ntoa(&IP_info_t.gw, info->gateway, 16);
+
+		return ESP_OK;
 	}
-	return NULL;
+
+	return ESP_FAIL;
+}
+
+void WiFi_STA_Release_IPInfo(wifi_ipinfo_t *info){
+	if(info->ip != NULL) free(info->ip);
+	if(info->netmask != NULL) free(info->netmask);
+	if(info->gateway != NULL) free(info->gateway);
 }
 
 uint8_t WiFi_STA_Scan(void){
@@ -242,10 +256,25 @@ uint8_t WiFi_STA_Scan(void){
     return (uint8_t)scan_ap_num;
 }
 
+void WiFi_STA_Scan_Get_Info(uint8_t num, wifi_info_t *info){
+	if(info->name != NULL) free(info->name);
+	uint8_t len = sizeof(scan_ap_info[num].ssid);
+
+	info->name = (char *)malloc(len * sizeof(uint8_t));
+	memcpy(info->name, scan_ap_info[num].ssid, sizeof(scan_ap_info[num].ssid));
+
+	info->rssi = scan_ap_info[num].rssi;
+}
+
+void WiFi_STA_Release_Info(wifi_info_t *info){
+	if(info->name != NULL) free(info->name);
+	info->rssi = 0;
+}
+
 char *WiFi_STA_Scan_Get_SSID(uint8_t Number){
 	char *buffer;
 	uint8_t len = sizeof(scan_ap_info[Number].ssid);
-	buffer = malloc(len * sizeof(uint8_t));
+	buffer = (char *)malloc(len * sizeof(uint8_t));
 	memcpy(buffer, scan_ap_info[Number].ssid, sizeof(scan_ap_info[Number].ssid));
 	return buffer;
 }

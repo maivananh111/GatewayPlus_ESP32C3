@@ -1,54 +1,122 @@
-[1/5] cd /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/esptool_py && /home/anh/.espressif/python_env/idf5.1_py3.10_env/bin/python /home/anh/ProgramFile/esp32-idf/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/partition_table/partition-table.bin /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/app-template.bin
-app-template.bin binary size 0x87310 bytes. Smallest app partition is 0x100000 bytes. 0x78cf0 bytes (47%) free.
-[2/5] Performing build step for 'bootloader'
+[1/10] Performing build step for 'bootloader'
 [1/1] cd /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader/esp-idf/esptool_py && /home/anh/.espressif/python_env/idf5.1_py3.10_env/bin/python /home/anh/ProgramFile/esp32-idf/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/bootloader/bootloader.bin
 Bootloader binary size 0x30c0 bytes. 0x4f40 bytes (62%) free.
-[2/3] cd /home/anh/ProgramFile/esp32-idf/esp-idf/components/esptool_py && /home/anh/.espressif/tools/cmake/3.24.0/bin/cmake -D IDF_PATH=/home/anh/ProgramFile/esp32-idf/esp-idf -D "SERIAL_TOOL=/home/anh/.espressif/python_env/idf5.1_py3.10_env/bin/python;;/home/anh/ProgramFile/esp32-idf/esp-idf/components/esptool_py/esptool/esptool.py;--chip;esp32c3" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build -P /home/anh/ProgramFile/esp32-idf/esp-idf/components/esptool_py/run_serial_tool.cmake
-esptool esp32c3 -p /dev/ttyACM0 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 80m --flash_size 2MB 0x0 bootloader/bootloader.bin 0x10000 app-template.bin 0x8000 partition_table/partition-table.bin
-esptool.py v4.5.1
-Serial port /dev/ttyACM0
-Connecting...
-Chip is ESP32-C3 (revision v0.3)
-Features: WiFi, BLE
-Crystal is 40MHz
-MAC: a0:76:4e:67:8d:d4
-Uploading stub...
-Running stub...
-Stub running...
-Changing baud rate to 460800
-Changed.
-Configuring flash size...
-Flash will be erased from 0x00000000 to 0x00003fff...
-Flash will be erased from 0x00010000 to 0x00097fff...
-Flash will be erased from 0x00008000 to 0x00008fff...
-Compressed 12480 bytes to 9123...
-Writing at 0x00000000... (100 %)
-Wrote 12480 bytes (9123 compressed) at 0x00000000 in 0.3 seconds (effective 376.3 kbit/s)...
-Hash of data verified.
-Compressed 553744 bytes to 274586...
-Writing at 0x00010000... (5 %)
-Writing at 0x0001bd3d... (11 %)
-Writing at 0x00029038... (17 %)
-Writing at 0x00032888... (23 %)
-Writing at 0x0003a329... (29 %)
-Writing at 0x00040e88... (35 %)
-Writing at 0x00048001... (41 %)
-Writing at 0x0004ebca... (47 %)
-Writing at 0x00055f68... (52 %)
-Writing at 0x0005e30d... (58 %)
-Writing at 0x00066ed8... (64 %)
-Writing at 0x0006f2e6... (70 %)
-Writing at 0x000769ad... (76 %)
-Writing at 0x0007da6d... (82 %)
-Writing at 0x00083e22... (88 %)
-Writing at 0x0008b409... (94 %)
-Writing at 0x00091929... (100 %)
-Wrote 553744 bytes (274586 compressed) at 0x00010000 in 4.9 seconds (effective 909.4 kbit/s)...
-Hash of data verified.
-Compressed 3072 bytes to 103...
-Writing at 0x00008000... (100 %)
-Wrote 3072 bytes (103 compressed) at 0x00008000 in 0.1 seconds (effective 448.0 kbit/s)...
-Hash of data verified.
-
-Leaving...
-Hard resetting via RTS pin...
+[2/8] Building CXX object esp-idf/commandline/CMakeFiles/__idf_commandline.dir/commandline.cpp.obj
+FAILED: esp-idf/commandline/CMakeFiles/__idf_commandline.dir/commandline.cpp.obj 
+/home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-g++ -DESP_PLATFORM -DIDF_VER=\"v5.1-dev-4726-gdf9310ada2\" -DMBEDTLS_CONFIG_FILE=\"mbedtls/esp_config.h\" -DSOC_MMU_PAGE_SIZE=CONFIG_MMU_PAGE_SIZE -D_GNU_SOURCE -D_POSIX_READER_WRITER_LOCKS -I/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/config -I/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/newlib/platform_include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/freertos/FreeRTOS-Kernel/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/freertos/FreeRTOS-Kernel/portable/riscv/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/freertos/esp_additions/include/freertos -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/freertos/esp_additions/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/freertos/esp_additions/arch/riscv/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_hw_support/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_hw_support/include/soc -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_hw_support/include/soc/esp32c3 -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_hw_support/port/esp32c3/. -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_hw_support/port/esp32c3/private_include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/heap/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/soc/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/soc/esp32c3 -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/soc/esp32c3/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/hal/esp32c3/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/hal/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/hal/platform_port/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_rom/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_rom/include/esp32c3 -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_rom/esp32c3 -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_common/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_system/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_system/port/soc -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_system/port/include/riscv -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_system/port/include/private -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/riscv/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/include/apps -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/include/apps/sntp -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/lwip/src/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/port/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/port/freertos/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/port/esp32xx/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/lwip/port/esp32xx/include/arch -I/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/WiFi/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_netif/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_event/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_wifi/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_wifi/wifi_apps/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_phy/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_phy/esp32c3/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_http_client/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp-tls -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp-tls/esp-tls-crypto -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/mbedtls/port/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/mbedtls/mbedtls/include -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/mbedtls/mbedtls/library -I/home/anh/ProgramFile/esp32-idf/esp-idf/components/mbedtls/esp_crt_bundle/include -march=rv32imc_zicsr_zifencei  -fdiagnostics-color=always -ffunction-sections -fdata-sections -Wall -Werror=all -Wno-error=unused-function -Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-enum-conversion -gdwarf-4 -ggdb -nostartfiles -Og -fmacro-prefix-map=/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3=. -fmacro-prefix-map=/home/anh/ProgramFile/esp32-idf/esp-idf=/IDF -fstrict-volatile-bitfields -fno-jump-tables -fno-tree-switch-conversion -DconfigENABLE_FREERTOS_DEBUG_OCDAWARE=1 -std=gnu++20 -fno-exceptions -fno-rtti -MD -MT esp-idf/commandline/CMakeFiles/__idf_commandline.dir/commandline.cpp.obj -MF esp-idf/commandline/CMakeFiles/__idf_commandline.dir/commandline.cpp.obj.d -o esp-idf/commandline/CMakeFiles/__idf_commandline.dir/commandline.cpp.obj -c /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp: In function 'cli_err_t json_get_object(char*, cli_json_t*, char*)':
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:89:25: warning: unused variable 'pend' [-Wunused-variable]
+   89 |         char *pkstart, *pend, *pvstart;
+      |                         ^~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp: In function 'cli_err_t cli_parse_packet(char*, cli_packet_t*)':
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:211:13: warning: unused variable 'src_len' [-Wunused-variable]
+  211 |         int src_len = strlen(src_cpy), data_len = 0;
+      |             ^~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:212:13: warning: unused variable 'ivstart' [-Wunused-variable]
+  212 |         int ivstart = 0, cmd_len = 0;
+      |             ^~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp: In function 'void cli_command_handler(cli_cmd_t)':
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:317:37: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  317 |                         char *buf = "CLI_CMD_WIFI_SCAN: {\"ssid\": ";
+      |                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:14:
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:265:27: error: too many arguments for format [-Werror=format-extra-args]
+  265 | #define LOG_COLOR(COLOR)  "\033[0;" COLOR "m"
+      |                           ^
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:268:27: note: in expansion of macro 'LOG_COLOR'
+  268 | #define LOG_COLOR_E       LOG_COLOR(LOG_COLOR_RED)
+      |                           ^~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:282:37: note: in expansion of macro 'LOG_COLOR_E'
+  282 | #define LOG_FORMAT(letter, format)  LOG_COLOR_ ## letter #letter " (%" PRIu32 ") %s: " format LOG_RESET_COLOR "\n"
+      |                                     ^~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:392:86: note: in expansion of macro 'LOG_FORMAT'
+  392 |         if (level==ESP_LOG_ERROR )          { esp_log_write(ESP_LOG_ERROR,      tag, LOG_FORMAT(E, format), esp_log_timestamp(), tag __VA_OPT__(,) __VA_ARGS__); } \
+      |                                                                                      ^~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:432:41: note: in expansion of macro 'ESP_LOG_LEVEL'
+  432 |         if ( LOG_LOCAL_LEVEL >= level ) ESP_LOG_LEVEL(level, tag, format, ##__VA_ARGS__); \
+      |                                         ^~~~~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:335:38: note: in expansion of macro 'ESP_LOG_LEVEL_LOCAL'
+  335 | #define ESP_LOGW( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN,    tag, format __VA_OPT__(,) __VA_ARGS__)
+      |                                      ^~~~~~~~~~~~~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:324:33: note: in expansion of macro 'ESP_LOGW'
+  324 |                                 ESP_LOGW(TAG, "Find: %s, total len = ", info.name, total_len);
+      |                                 ^~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:265:27: error: too many arguments for format [-Werror=format-extra-args]
+  265 | #define LOG_COLOR(COLOR)  "\033[0;" COLOR "m"
+      |                           ^
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:269:27: note: in expansion of macro 'LOG_COLOR'
+  269 | #define LOG_COLOR_W       LOG_COLOR(LOG_COLOR_BROWN)
+      |                           ^~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:282:37: note: in expansion of macro 'LOG_COLOR_W'
+  282 | #define LOG_FORMAT(letter, format)  LOG_COLOR_ ## letter #letter " (%" PRIu32 ") %s: " format LOG_RESET_COLOR "\n"
+      |                                     ^~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:393:86: note: in expansion of macro 'LOG_FORMAT'
+  393 |         else if (level==ESP_LOG_WARN )      { esp_log_write(ESP_LOG_WARN,       tag, LOG_FORMAT(W, format), esp_log_timestamp(), tag __VA_OPT__(,) __VA_ARGS__); } \
+      |                                                                                      ^~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:432:41: note: in expansion of macro 'ESP_LOG_LEVEL'
+  432 |         if ( LOG_LOCAL_LEVEL >= level ) ESP_LOG_LEVEL(level, tag, format, ##__VA_ARGS__); \
+      |                                         ^~~~~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:335:38: note: in expansion of macro 'ESP_LOG_LEVEL_LOCAL'
+  335 | #define ESP_LOGW( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN,    tag, format __VA_OPT__(,) __VA_ARGS__)
+      |                                      ^~~~~~~~~~~~~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:324:33: note: in expansion of macro 'ESP_LOGW'
+  324 |                                 ESP_LOGW(TAG, "Find: %s, total len = ", info.name, total_len);
+      |                                 ^~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:324:8: error: too many arguments for format [-Werror=format-extra-args]
+  324 |                                 ESP_LOGW(TAG, "Find: %s, total len = ", info.name, total_len);
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:282:59: note: in definition of macro 'LOG_FORMAT'
+  282 | #define LOG_FORMAT(letter, format)  LOG_COLOR_ ## letter #letter " (%" PRIu32 ") %s: " format LOG_RESET_COLOR "\n"
+      |                                                           ^~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:432:41: note: in expansion of macro 'ESP_LOG_LEVEL'
+  432 |         if ( LOG_LOCAL_LEVEL >= level ) ESP_LOG_LEVEL(level, tag, format, ##__VA_ARGS__); \
+      |                                         ^~~~~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:335:38: note: in expansion of macro 'ESP_LOG_LEVEL_LOCAL'
+  335 | #define ESP_LOGW( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN,    tag, format __VA_OPT__(,) __VA_ARGS__)
+      |                                      ^~~~~~~~~~~~~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:324:33: note: in expansion of macro 'ESP_LOGW'
+  324 |                                 ESP_LOGW(TAG, "Find: %s, total len = ", info.name, total_len);
+      |                                 ^~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:324:8: error: too many arguments for format [-Werror=format-extra-args]
+  324 |                                 ESP_LOGW(TAG, "Find: %s, total len = ", info.name, total_len);
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:282:59: note: in definition of macro 'LOG_FORMAT'
+  282 | #define LOG_FORMAT(letter, format)  LOG_COLOR_ ## letter #letter " (%" PRIu32 ") %s: " format LOG_RESET_COLOR "\n"
+      |                                                           ^~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:432:41: note: in expansion of macro 'ESP_LOG_LEVEL'
+  432 |         if ( LOG_LOCAL_LEVEL >= level ) ESP_LOG_LEVEL(level, tag, format, ##__VA_ARGS__); \
+      |                                         ^~~~~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:335:38: note: in expansion of macro 'ESP_LOG_LEVEL_LOCAL'
+  335 | #define ESP_LOGW( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN,    tag, format __VA_OPT__(,) __VA_ARGS__)
+      |                                      ^~~~~~~~~~~~~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:324:33: note: in expansion of macro 'ESP_LOGW'
+  324 |                                 ESP_LOGW(TAG, "Find: %s, total len = ", info.name, total_len);
+      |                                 ^~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:265:27: error: too many arguments for format [-Werror=format-extra-args]
+  265 | #define LOG_COLOR(COLOR)  "\033[0;" COLOR "m"
+      |                           ^
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:270:27: note: in expansion of macro 'LOG_COLOR'
+  270 | #define LOG_COLOR_I       LOG_COLOR(LOG_COLOR_GREEN)
+      |                           ^~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:282:37: note: in expansion of macro 'LOG_COLOR_I'
+  282 | #define LOG_FORMAT(letter, format)  LOG_COLOR_ ## letter #letter " (%" PRIu32 ") %s: " format LOG_RESET_COLOR "\n"
+      |                                     ^~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:396:86: note: in expansion of macro 'LOG_FORMAT'
+  396 |         else                                { esp_log_write(ESP_LOG_INFO,       tag, LOG_FORMAT(I, format), esp_log_timestamp(), tag __VA_OPT__(,) __VA_ARGS__); } \
+      |                                                                                      ^~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:432:41: note: in expansion of macro 'ESP_LOG_LEVEL'
+  432 |         if ( LOG_LOCAL_LEVEL >= level ) ESP_LOG_LEVEL(level, tag, format, ##__VA_ARGS__); \
+      |                                         ^~~~~~~~~~~~~
+/home/anh/ProgramFile/esp32-idf/esp-idf/components/log/include/esp_log.h:335:38: note: in expansion of macro 'ESP_LOG_LEVEL_LOCAL'
+  335 | #define ESP_LOGW( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_WARN,    tag, format __VA_OPT__(,) __VA_ARGS__)
+      |                                      ^~~~~~~~~~~~~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:324:33: note: in expansion of macro 'ESP_LOGW'
+  324 |                                 ESP_LOGW(TAG, "Find: %s, total len = ", info.name, total_len);
+      |                                 ^~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp: At global scope:
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:187:18: warning: 'cli_err_t json_release_object(cli_json_t*)' defined but not used [-Wunused-function]
+  187 | static cli_err_t json_release_object(cli_json_t *json){
+      |                  ^~~~~~~~~~~~~~~~~~~
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/commandline.cpp:84:18: warning: 'cli_err_t json_get_object(char*, cli_json_t*, char*)' defined but not used [-Wunused-function]
+   84 | static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
+      |                  ^~~~~~~~~~~~~~~
+cc1plus: some warnings being treated as errors
+ninja: build stopped: subcommand failed.

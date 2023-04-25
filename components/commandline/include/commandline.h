@@ -24,10 +24,11 @@ typedef enum {
 	 * Network control command.
 	 */
 #if defined(CONFIG_CLI_SUPPORT_WIFI_CONTROL)
-	CLI_CMD_NET_WIFI_SCAN,
-	CLI_CMD_NET_WIFI_CONN,
-	CLI_CMD_NET_WIFI_DISCONN,
-	CLI_CMD_NET_GETIP,
+	CLI_CMD_WIFI_SCAN,
+	CLI_CMD_WIFI_CHECK_CONNECT,
+	CLI_CMD_WIFI_CONN,
+	CLI_CMD_WIFI_DISCONN,
+	CLI_CMD_WIFI_GETIP,
 #endif /* defined(CONFIG_CLI_SUPPORT_WIFI_CONTROL) */
 
 	/**
@@ -44,8 +45,6 @@ typedef enum {
 	CLI_CMD_HTTP_CLIENT_REQUEST,
 #endif /* defined(CONFIG_CLI_SUPPORT_HTTP_CLIENT) */
 
-
-
 	CLI_CMD_NUM,
 } cli_cmd_t;
 
@@ -55,7 +54,7 @@ typedef enum{
 	CLI_ERR_FORMAT = 0x00000002,
 	CLI_ERR_NOKEY  = 0x00000004,
 	CLI_ERR_NOVAL  = 0x00000008,
-	CLI_ERR_RELEASE = 0x00000010,
+	CLI_ERR_MEM    = 0x00000010,
 } cli_err_t;
 
 
@@ -70,10 +69,9 @@ typedef struct{
 extern const char *cli_command_string[];
 
 void commandline_init(void (*presponse_function)(char *resp));
-void commandline_register_handler(void (*pfunction)(cli_cmd_t command));
 void commandline_process(void *param);
 
-cli_err_t cli_parse_packet(char *src,cli_packet_t *dest);
+
 
 
 

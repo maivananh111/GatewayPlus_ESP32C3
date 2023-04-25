@@ -15,6 +15,14 @@
 
 #include "string.h"
 
+#if CONFIG_CLI_SUPPORT_WIFI_CONTROL
+#include "WiFi.h"
+#endif /* CONFIG_CLI_SUPPORT_WIFI_CONTROL */
+#if CONFIG_CLI_SUPPORT_HTTP_CLIENT
+#include "esp_http_client.h"
+#include "esp_event.h"
+#include "esp_crt_bundle.h"
+#endif /* CONFIG_CLI_SUPPORT_HTTP_CLIENT */
 
 static const char *TAG = "CLI";
 const char *cli_command_string[] = {
@@ -23,10 +31,11 @@ const char *cli_command_string[] = {
 	 * Network control command.
 	 */
 #if defined(CONFIG_CLI_SUPPORT_WIFI_CONTROL)
-	"CLI_CMD_NET_WIFI_SCAN",
-	"CLI_CMD_NET_WIFI_CONN",
-	"CLI_CMD_NET_WIFI_DISCONN",
-	"CLI_CMD_NET_GETIP",
+	"CLI_CMD_WIFI_SCAN",
+	"CLI_CMD_WIFI_CHECK_CONNECT",
+	"CLI_CMD_WIFI_CONN",
+	"CLI_CMD_WIFI_DISCONN",
+	"CLI_CMD_WIFI_GETIP",
 #endif /* defined(CONFIG_CLI_SUPPORT_WIFI_CONTROL) */
 
 	/**
@@ -62,15 +71,14 @@ typedef struct {
 
 static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key);
 static cli_err_t json_release_object(cli_json_t *json);
-
+static cli_err_t cli_parse_packet(char *src,cli_packet_t *dest);
+static cli_err_t cli_release_packet(cli_packet_t *packet);
 static cli_cmd_t cli_str2cmd(char *str);
+static void cli_command_handler(cli_cmd_t cmd);
+static void cli_error_handler(char *str, int line, char *func);
 
-void commandline_init(void (*presponse_function)(char *resp)){
-	resp_pfunction = presponse_function;
-}
-
-void commandline_register_handler(void (*pfunction)(cli_cmd_t command)){
-	pevent_handler = pfunction;
+static void cli_error_handler(char *str, int line, char *func){
+	ESP_LOGE(TAG, "%s, Line %d Function %s", str, line, func);
 }
 
 static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
@@ -83,12 +91,12 @@ static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 
 	/** check input */
 	if(src == NULL || dest == NULL || key == NULL){
-		ESP_LOGE(TAG, "Input argument error!");
+		cli_error_handler((char *)"Error bad input argument!", (int)__LINE__, (char *)__FUNCTION__);
 		ret = CLI_ERR_ARG;
 		return ret;
 	}
-	if(src[0] != '{' || src[src_len - 1] != '}'){
-		ESP_LOGE(TAG, "Input request string format error!");
+	if(src[0] != '{' || src[src_len - 1] != '}' || src[src_len] != '\0'){
+		cli_error_handler((char *)"Error input request string format!", (int)__LINE__, (char *)__FUNCTION__);
 		ret = CLI_ERR_FORMAT;
 		return ret;
 	}
@@ -96,7 +104,7 @@ static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 	/** Find key */
 	pkstart = strstr(src_cpy, key);
 	if(pkstart == NULL){
-		ESP_LOGE(TAG, "Key \"%s\" not appear in the input request string!", key);
+		cli_error_handler((char *)"Error key not appear in the input request string!", (int)__LINE__, (char *)__FUNCTION__);
 		ret = CLI_ERR_NOKEY;
 		return ret;
 	}
@@ -108,6 +116,11 @@ static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 	}
 
 	dest->key = (char *)malloc((key_len+1) * sizeof(char));
+	if(dest->key == NULL){
+		cli_error_handler((char *)"Error can't allocation memory!", (int)__LINE__, (char *)__FUNCTION__);
+		ret = CLI_ERR_MEM;
+		return ret;
+	}
 	memcpy(dest->key, pkstart, key_len); 	/** assign key to jsn struct */
 	dest->key[key_len] = '\0';
 
@@ -117,10 +130,7 @@ static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 	/** Find Value start index */
 	ivstart = (int)((pkstart - src_cpy) + key_len + 3);
 	pvstart = pkstart;
-	if((char)(*(uint32_t *)(pvstart + key_len + 3)) != '{'){
-		dest->leaf = true;
-		ESP_LOGE(TAG, "\"%s\" is leaf item.", dest->key);
-	}
+	if((char)(*(uint32_t *)(pvstart + key_len + 3)) != '{') dest->leaf = true;
 
 	/** Get start point off value */
 	pvstart = (char *)(pvstart + key_len + 3);
@@ -139,11 +149,16 @@ static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 			}
 		}
 		if(val_len == 0){
-			ESP_LOGE(TAG, "Key %s no value.", dest->key);
+			cli_error_handler((char *)"Error key no value!", (int)__LINE__, (char *)__FUNCTION__);
 			ret = CLI_ERR_NOVAL;
 			return ret;
 		}
 		dest->value = (char *)malloc((val_len+1) * sizeof(char));
+		if(dest->value == NULL){
+			cli_error_handler((char *)"Error can't allocation memory!", (int)__LINE__, (char *)__FUNCTION__);
+			ret = CLI_ERR_MEM;
+			return ret;
+		}
 		memcpy(dest->value, pvstart, val_len); 	/** assign key to jsn struct */
 		dest->value[val_len] = '\0';
 	}
@@ -157,6 +172,11 @@ static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 		}
 		val_len = ivend - ivstart + 1;
 		dest->value = (char *)malloc(val_len + 1);
+		if(dest->value == NULL){
+			cli_error_handler((char *)"Error can't allocation memory!", (int)__LINE__, (char *)__FUNCTION__);
+			ret = CLI_ERR_MEM;
+			return ret;
+		}
 		memcpy(dest->value, pvstart, val_len); 	/** assign key to jsn struct */
 		dest->value[val_len] = '\0';
 	}
@@ -165,22 +185,11 @@ static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 }
 
 static cli_err_t json_release_object(cli_json_t *json){
-	cli_err_t ret;
 	if(json->key != NULL) free(json->key);
-	else{
-		ESP_LOGE(TAG, "Error release json object.");
-		ret = CLI_ERR_RELEASE;
-		return ret;
-	}
 	if(json->value != NULL) free(json->value);
-	else{
-		ESP_LOGE(TAG, "Error release json object.");
-		ret = CLI_ERR_RELEASE;
-		return ret;
-	}
 	json->leaf = false;
 
-	return ret;
+	return CLI_ERR_OK;
 }
 
 static cli_cmd_t cli_str2cmd(char *str){
@@ -196,8 +205,8 @@ static cli_cmd_t cli_str2cmd(char *str){
 	return cmd;
 }
 
-cli_err_t cli_parse_packet(char *src,cli_packet_t *dest){
-	cli_err_t ret;
+static cli_err_t cli_parse_packet(char *src,cli_packet_t *dest){
+	cli_err_t ret = CLI_ERR_OK;
 	char *src_cpy = src;
 	int src_len = strlen(src_cpy), data_len = 0;
 	int ivstart = 0, cmd_len = 0;
@@ -206,8 +215,9 @@ cli_err_t cli_parse_packet(char *src,cli_packet_t *dest){
 	/** Get ": " */
 	pvstart = strstr(src, ": ");
 	if(pvstart == NULL){
-		ESP_LOGE(TAG, "Packet format error!");
+		cli_error_handler((char *)"Error packet format!", (int)__LINE__, (char *)__FUNCTION__);
 		ret = CLI_ERR_FORMAT;
+		dest->command = CLI_CMD_ERR;
 		return ret;
 	}
 
@@ -216,6 +226,11 @@ cli_err_t cli_parse_packet(char *src,cli_packet_t *dest){
 
 	/** Assign command string */
 	dest->cmd_str = (char *)malloc((cmd_len + 1) * sizeof(char));
+	if(dest->cmd_str == NULL){
+		cli_error_handler((char *)"Error can't allocation memory!", (int)__LINE__, (char *)__FUNCTION__);
+		ret = CLI_ERR_MEM;
+		return ret;
+	}
 	memcpy(dest->cmd_str, src_cpy, cmd_len);
 	dest->cmd_str[cmd_len] = '\0';
 
@@ -226,25 +241,145 @@ cli_err_t cli_parse_packet(char *src,cli_packet_t *dest){
 	pvstart = (char *)(pvstart + 2);
 	data_len = strlen(pvstart);
 	dest->data_str = (char *)malloc((data_len + 1) * sizeof(char));
+	if(dest->data_str == NULL){
+		cli_error_handler((char *)"Error can't allocation memory!", (int)__LINE__, (char *)__FUNCTION__);
+		ret = CLI_ERR_MEM;
+		return ret;
+	}
 	memcpy(dest->data_str, pvstart, data_len);
 	dest->data_str[data_len] = '\0';
 
 	return ret;
 }
 
-void commandline_process(void *param){
-	QueueHandle_t *req_queue = (QueueHandle_t *)param;
-	char *req_full;
-	while(1){
-		if(xQueueReceive(*req_queue, (void *)&req_full, (TickType_t)portMAX_DELAY)){
+static cli_err_t cli_release_packet(cli_packet_t *packet){
+	if(packet->cmd_str != NULL) free(packet->cmd_str);
+	if(packet->data_str != NULL) free(packet->data_str);
+	packet->command = CLI_CMD_ERR;
 
+	return CLI_ERR_OK;
+}
 
+void commandline_init(void (*presponse_function)(char *resp)){
+	resp_pfunction = presponse_function;
+}
 
-			free(req_full);
+static void cli_command_handler(cli_cmd_t cmd){
+	switch(cmd){
+		/**
+		 * CLI_CMD_ERR
+		 */
+		case CLI_CMD_ERR:{
+			cli_error_handler((char *)"Unknown command!", (int)__LINE__, (char *)__FUNCTION__);
 		}
-		vTaskDelay(10/portTICK_PERIOD_MS);
+		break;
+
+		/**
+		 * CLI_CMD_WIFI_GETIP.
+		 */
+		case CLI_CMD_WIFI_GETIP:{
+			char *buf;
+			wifi_ipinfo_t ipinfo;
+			if(WiFi_STA_Get_IPInfo(&ipinfo) == ESP_OK){
+				/** handle response IP */
+				asprintf(&buf, "CLI_CMD_WIFI_GETIP: {\"ip\": \"%s\", \"netmask\": \"%s\", \"gateway\": \"%s\"}",
+						ipinfo.ip, ipinfo.netmask, ipinfo.gateway);
+
+				WiFi_STA_Release_IPInfo(&ipinfo);
+			}
+			else{
+				asprintf(&buf, "CLI_CMD_WIFI_GETIP: {\"ip\": \"0.0.0.0\", \"netmask\": \"0.0.0.0\", \"gateway\": \"0.0.0.0\"}");
+			}
+
+			resp_pfunction(buf);
+			free(buf);
+		}
+		break;
+
+		/**
+		 * CLI_CMD_WIFI_CHECK_CONNECT.
+		 */
+		case CLI_CMD_WIFI_CHECK_CONNECT:{
+			char *buf;
+
+			asprintf(&buf, "CLI_CMD_WIFI_CHECK_CONNECT: {\"isconnected\": %01d}", (int)WiFi_GetState());
+
+			resp_pfunction((char *)buf);
+
+			free(buf);
+		}
+		break;
+
+		/**
+		 * CLI_CMD_WIFI_SCAN.
+		 */
+		case CLI_CMD_WIFI_SCAN:{
+			char *buf = "CLI_CMD_WIFI_SCAN: {\"ssid\": ";
+			uint8_t num_wifi = WiFi_STA_Scan();
+			wifi_info_t info;
+			int total_len = strlen(buf);
+			for(uint8_t i=0; i<num_wifi; i++){
+				WiFi_STA_Scan_Get_Info(i, &info);
+				 total_len += strlen(info.name);
+				ESP_LOGW(TAG, "Find: %s, total len = %d", info.name, total_len);
+//				buf = (char *)realloc(buf, total_len);
+//				strcat(buf, info.name);
+//				buf[total_len-1] = '|';
+			}
+
+//			resp_pfunction((char *)buf);
+//			free(buf);
+//			WiFi_STA_Release_Info(&info);
+		}
+		break;
+
+		case CLI_CMD_WIFI_CONN:{
+
+		}
+		break;
+
+		case CLI_CMD_WIFI_DISCONN:{
+
+		}
+		break;
+
+		default:
+
+		break;
 	}
 
+}
+
+void commandline_process(void *param){
+//	QueueHandle_t *req_queue = (QueueHandle_t *)param;
+	cli_err_t ret = CLI_ERR_OK;
+	char *req_full = (char *)param;
+	cli_json_t json;
+	cli_packet_t pkt;
+	cli_cmd_t cmd;
+
+//	while(1){
+//		if(xQueueReceive(*req_queue, (void *)&req_full, (TickType_t)portMAX_DELAY)){
+			/** Parse received packet */
+			ret = cli_parse_packet(req_full, &pkt);
+			if(ret != CLI_ERR_OK){
+				cli_error_handler((char *)"Error parse packet!", (int)__LINE__, (char *)__FUNCTION__);
+				cli_release_packet(&pkt);
+//				continue;
+				return;
+			}
+
+			cmd = pkt.command;
+			ESP_LOGI(TAG, "Packet command: %s", pkt.cmd_str);
+			ESP_LOGI(TAG, "Packet data: %s", pkt.data_str);
+			ESP_LOGI(TAG, "Packet command number %d", (int)pkt.command);
+			/** Command handle */
+			cli_command_handler(cmd);
+
+//			free(req_full);
+//			vTaskDelay(10/portTICK_PERIOD_MS);
+//		}
+//	}
 }
 
 
