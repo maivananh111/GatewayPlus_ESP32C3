@@ -8,7 +8,7 @@
     "app_elf":            "app-template.elf",
     "app_bin":            "app-template.bin",
     "build_type":         "flash_app",
-    "git_revision":       "v5.1-dev-4726-gdf9310ada2",
+    "git_revision":       "v5.1-dev-4726-gdf9310ada2-dirty",
     "target":             "esp32c3",
     "rev":                "",
     "min_rev":            "3",

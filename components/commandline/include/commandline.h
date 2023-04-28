@@ -20,6 +20,8 @@ extern "C" {
 
 typedef enum {
 	CLI_CMD_ERR = 0x00,
+
+	CLI_CMD_RESTART,
 	/**
 	 * Network control command.
 	 */
@@ -40,9 +42,10 @@ typedef enum {
 	CLI_CMD_HTTP_CLIENT_CONNECT,
 	CLI_CMD_HTTP_CLIENT_DISCONNECT,
 	CLI_CMD_HTTP_CLIENT_SET_HEADER,
-	CLI_CMD_HTTP_CLIENNT_SET_DATA,
 	CLI_CMD_HTTP_CLIENT_SET_METHOD,
+	CLI_CMD_HTTP_CLIENT_SET_DATA,
 	CLI_CMD_HTTP_CLIENT_REQUEST,
+	CLI_CMD_HTTP_CLIENT_RESPONSE,
 #endif /* defined(CONFIG_CLI_SUPPORT_HTTP_CLIENT) */
 
 	CLI_CMD_NUM,
@@ -64,6 +67,11 @@ typedef struct{
 	cli_cmd_t command = CLI_CMD_ERR;
 }cli_packet_t;
 
+typedef struct {
+	char *key = NULL;
+	bool leaf = false;
+	char *value = NULL;
+} cli_json_t;
 
 
 extern const char *cli_command_string[];

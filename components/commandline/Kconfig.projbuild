@@ -11,4 +11,11 @@ config CLI_SUPPORT_HTTP_CLIENT
     default "0"
     help
 	Support HTTP client command.
+	if CLI_SUPPORT_HTTP_CLIENT
+		config CLI_SUPPORT_NUM_HTTP_CLIENT
+			int "Number of client."
+			default 1
+			help
+			Number of clients can be use.
+	endif # CLI_SUPPORT_HTTP_CLIENT
 endmenu

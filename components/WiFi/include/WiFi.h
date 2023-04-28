@@ -52,6 +52,7 @@ void WiFi_STA_Release_Info(wifi_info_t *info);
 char *WiFi_STA_Scan_Get_SSID(uint8_t num);
 int8_t WiFi_STA_Scan_Get_RSSI(uint8_t num);
 
+wifi_auth_mode_t WiFi_StrToAuth(char *str);
 
 
 #ifdef __cplusplus

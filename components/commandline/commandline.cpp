@@ -27,6 +27,8 @@
 static const char *TAG = "CLI";
 const char *cli_command_string[] = {
 	"CLI_CMD_ERR",
+
+	"CLI_CMD_RESTART",
 	/**
 	 * Network control command.
 	 */
@@ -47,9 +49,10 @@ const char *cli_command_string[] = {
 	"CLI_CMD_HTTP_CLIENT_CONNECT",
 	"CLI_CMD_HTTP_CLIENT_DISCONNECT",
 	"CLI_CMD_HTTP_CLIENT_SET_HEADER",
-	"CLI_CMD_HTTP_CLIENNT_SET_DATA",
 	"CLI_CMD_HTTP_CLIENT_SET_METHOD",
+	"CLI_CMD_HTTP_CLIENT_SET_DATA",
 	"CLI_CMD_HTTP_CLIENT_REQUEST",
+	"CLI_CMD_HTTP_CLIENT_RESPONSE",
 #endif /* defined(CONFIG_CLI_SUPPORT_HTTP_CLIENT) */
 
 
@@ -63,25 +66,39 @@ void (*pevent_handler)(cli_cmd_t command);
 /**
  * json function.
  */
-typedef struct {
-	char *key = NULL;
-	bool leaf = false;
-	char *value = NULL;
-} cli_json_t;
 
-static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key);
-static cli_err_t json_release_object(cli_json_t *json);
+cli_err_t json_get_object(char *src, cli_json_t *dest, char *key);
+cli_err_t json_release_object(cli_json_t *json);
 static cli_err_t cli_parse_packet(char *src,cli_packet_t *dest);
 static cli_err_t cli_release_packet(cli_packet_t *packet);
 static cli_cmd_t cli_str2cmd(char *str);
-static void cli_command_handler(cli_cmd_t cmd);
+static void cli_command_handler(cli_packet_t *packet);
 static void cli_error_handler(char *str, int line, char *func);
+
+
+#if defined(CONFIG_CLI_SUPPORT_WIFI_CONTROL)
+extern void clif_check_connect(void);
+extern void clif_get_ip(void);
+extern void clif_wifi_scan(void);
+extern void clif_wifi_connect(cli_packet_t *packet);
+extern void clif_wifi_disconnect(void);
+#endif
+#if CONFIG_CLI_SUPPORT_HTTP_CLIENT
+extern void clif_http_client_new(cli_packet_t *packet);
+extern void clif_http_client_config(cli_packet_t *packet);
+extern void clif_http_client_connect(cli_packet_t *packet);
+extern void clif_http_client_disconnect(cli_packet_t *packet);
+extern void clif_http_client_set_header(cli_packet_t *packet);
+extern void clif_http_client_set_method(cli_packet_t *packet);
+extern void clif_http_client_set_data(cli_packet_t *packet);
+extern void clif_http_client_request(cli_packet_t *packet);
+#endif
 
 static void cli_error_handler(char *str, int line, char *func){
 	ESP_LOGE(TAG, "%s, Line %d Function %s", str, line, func);
 }
 
-static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
+cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 	cli_err_t ret = CLI_ERR_OK;
 	char *src_cpy = src;
 	int src_len = strlen(src);
@@ -121,7 +138,7 @@ static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 		ret = CLI_ERR_MEM;
 		return ret;
 	}
-	memcpy(dest->key, pkstart, key_len); 	/** assign key to jsn struct */
+	memcpy(dest->key, pkstart, key_len); 	/** assign key to json struct */
 	dest->key[key_len] = '\0';
 
 	/**
@@ -130,7 +147,9 @@ static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 	/** Find Value start index */
 	ivstart = (int)((pkstart - src_cpy) + key_len + 3);
 	pvstart = pkstart;
-	if((char)(*(uint32_t *)(pvstart + key_len + 3)) != '{') dest->leaf = true;
+	if((char)(*(uint32_t *)(pvstart + key_len + 3)) != '{') {
+		dest->leaf = true;
+	}
 
 	/** Get start point off value */
 	pvstart = (char *)(pvstart + key_len + 3);
@@ -184,7 +203,7 @@ static cli_err_t json_get_object(char *src, cli_json_t *dest, char *key){
 	return ret;
 }
 
-static cli_err_t json_release_object(cli_json_t *json){
+cli_err_t json_release_object(cli_json_t *json){
 	if(json->key != NULL) free(json->key);
 	if(json->value != NULL) free(json->value);
 	json->leaf = false;
@@ -264,87 +283,78 @@ void commandline_init(void (*presponse_function)(char *resp)){
 	resp_pfunction = presponse_function;
 }
 
-static void cli_command_handler(cli_cmd_t cmd){
-	switch(cmd){
-		/**
-		 * CLI_CMD_ERR
-		 */
-		case CLI_CMD_ERR:{
-			cli_error_handler((char *)"Unknown command!", (int)__LINE__, (char *)__FUNCTION__);
-		}
+static void cli_command_handler(cli_packet_t *packet){
+	switch(packet->command){
+		case CLI_CMD_RESTART:
+			ESP_LOGW(TAG, "Command restart esp");
+			esp_restart();
 		break;
-
-		/**
-		 * CLI_CMD_WIFI_GETIP.
-		 */
+#if defined(CONFIG_CLI_SUPPORT_WIFI_CONTROL)
 		case CLI_CMD_WIFI_GETIP:{
-			char *buf;
-			wifi_ipinfo_t ipinfo;
-			if(WiFi_STA_Get_IPInfo(&ipinfo) == ESP_OK){
-				/** handle response IP */
-				asprintf(&buf, "CLI_CMD_WIFI_GETIP: {\"ip\": \"%s\", \"netmask\": \"%s\", \"gateway\": \"%s\"}",
-						ipinfo.ip, ipinfo.netmask, ipinfo.gateway);
-
-				WiFi_STA_Release_IPInfo(&ipinfo);
-			}
-			else{
-				asprintf(&buf, "CLI_CMD_WIFI_GETIP: {\"ip\": \"0.0.0.0\", \"netmask\": \"0.0.0.0\", \"gateway\": \"0.0.0.0\"}");
-			}
-
-			resp_pfunction(buf);
-			free(buf);
+			clif_get_ip();
 		}
 		break;
-
-		/**
-		 * CLI_CMD_WIFI_CHECK_CONNECT.
-		 */
 		case CLI_CMD_WIFI_CHECK_CONNECT:{
-			char *buf;
-
-			asprintf(&buf, "CLI_CMD_WIFI_CHECK_CONNECT: {\"isconnected\": %01d}", (int)WiFi_GetState());
-
-			resp_pfunction((char *)buf);
-
-			free(buf);
+			clif_check_connect();
 		}
 		break;
-
-		/**
-		 * CLI_CMD_WIFI_SCAN.
-		 */
 		case CLI_CMD_WIFI_SCAN:{
-			char *buf = "CLI_CMD_WIFI_SCAN: {\"ssid\": ";
-			uint8_t num_wifi = WiFi_STA_Scan();
-			wifi_info_t info;
-			int total_len = strlen(buf);
-			for(uint8_t i=0; i<num_wifi; i++){
-				WiFi_STA_Scan_Get_Info(i, &info);
-				 total_len += strlen(info.name);
-				ESP_LOGW(TAG, "Find: %s, total len = %d", info.name, total_len);
-//				buf = (char *)realloc(buf, total_len);
-//				strcat(buf, info.name);
-//				buf[total_len-1] = '|';
-			}
-
-//			resp_pfunction((char *)buf);
-//			free(buf);
-//			WiFi_STA_Release_Info(&info);
+			clif_wifi_scan();
 		}
 		break;
 
 		case CLI_CMD_WIFI_CONN:{
-
+			clif_wifi_connect(packet);
 		}
 		break;
 
 		case CLI_CMD_WIFI_DISCONN:{
+			clif_wifi_disconnect();
+		}
+		break;
+#endif /* defined(CONFIG_CLI_SUPPORT_WIFI_CONTROL) */
 
+
+
+#if defined(CONFIG_CLI_SUPPORT_HTTP_CLIENT)
+		case CLI_CMD_HTTP_CLIENT_NEW:{
+			clif_http_client_new(packet);
+		}
+		break;
+		case CLI_CMD_HTTP_CLIENT_CONFIG:{
+			clif_http_client_config(packet);
+		}
+		break;
+		case CLI_CMD_HTTP_CLIENT_CONNECT:{
+			clif_http_client_connect(packet);
+		}
+		break;
+		case CLI_CMD_HTTP_CLIENT_DISCONNECT:{
+			clif_http_client_disconnect(packet);
+		}
+		break;
+		case CLI_CMD_HTTP_CLIENT_SET_HEADER:{
+			clif_http_client_set_header(packet);
+		}
+		break;
+		case CLI_CMD_HTTP_CLIENT_SET_METHOD:{
+			clif_http_client_set_method(packet);
+		}
+		break;
+		case CLI_CMD_HTTP_CLIENT_SET_DATA:{
+			clif_http_client_set_data(packet);
+		}
+		break;
+		case CLI_CMD_HTTP_CLIENT_REQUEST:{
+			clif_http_client_request(packet);
 		}
 		break;
 
-		default:
 
+#endif /* defined(CONFIG_CLI_SUPPORT_HTTP_CLIENT) */
+
+		default:
+			cli_error_handler((char *)"Unknown command!", (int)__LINE__, (char *)__FUNCTION__);
 		break;
 	}
 
@@ -356,7 +366,6 @@ void commandline_process(void *param){
 	char *req_full = (char *)param;
 	cli_json_t json;
 	cli_packet_t pkt;
-	cli_cmd_t cmd;
 
 //	while(1){
 //		if(xQueueReceive(*req_queue, (void *)&req_full, (TickType_t)portMAX_DELAY)){
@@ -369,14 +378,10 @@ void commandline_process(void *param){
 				return;
 			}
 
-			cmd = pkt.command;
-			ESP_LOGI(TAG, "Packet command: %s", pkt.cmd_str);
-			ESP_LOGI(TAG, "Packet data: %s", pkt.data_str);
-			ESP_LOGI(TAG, "Packet command number %d", (int)pkt.command);
 			/** Command handle */
-			cli_command_handler(cmd);
-
-//			free(req_full);
+			cli_command_handler(&pkt);
+			cli_release_packet(&pkt);
+//			if(req_full) free(req_full);
 //			vTaskDelay(10/portTICK_PERIOD_MS);
 //		}
 //	}

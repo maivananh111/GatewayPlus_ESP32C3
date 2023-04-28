@@ -4842,7 +4842,7 @@
             {
                 "children": [],
                 "depends_on": null,
-                "help": "Support HTTP client command.",
+                "help": "Support HTTP client command.\nif CLI_SUPPORT_HTTP_CLIENT\n        config CLI_SUPPORT_NUM_HTTP_CLIENT\n                int \"Number of client.\"\n                default 1\n                help\n                Number of clients can be use.\nendif # CLI_SUPPORT_HTTP_CLIENT",
                 "id": "CLI_SUPPORT_HTTP_CLIENT",
                 "name": "CLI_SUPPORT_HTTP_CLIENT",
                 "range": null,

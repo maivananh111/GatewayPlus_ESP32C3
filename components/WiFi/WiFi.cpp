@@ -36,6 +36,29 @@ static wifi_ap_record_t scan_ap_info[20];
 static uint16_t scan_ap_num = 0;
 
 
+static const char *wifi_auth_str[] = {
+	"WIFI_AUTH_OPEN",         /**< authenticate mode : open */
+	"WIFI_AUTH_WEP",              /**< authenticate mode : WEP */
+	"WIFI_AUTH_WPA_PSK",          /**< authenticate mode : WPA_PSK */
+	"WIFI_AUTH_WPA2_PSK",         /**< authenticate mode : WPA2_PSK */
+	"WIFI_AUTH_WPA_WPA2_PSK",     /**< authenticate mode : WPA_WPA2_PSK */
+	"WIFI_AUTH_WPA2_ENTERPRISE",  /**< authenticate mode : WPA2_ENTERPRISE */
+	"WIFI_AUTH_WPA3_PSK",         /**< authenticate mode : WPA3_PSK */
+	"WIFI_AUTH_WPA2_WPA3_PSK",    /**< authenticate mode : WPA2_WPA3_PSK */
+	"WIFI_AUTH_WAPI_PSK",         /**< authenticate mode : WAPI_PSK */
+	"WIFI_AUTH_OWE",              /**< authenticate mode : OWE */
+	"WIFI_AUTH_MAX"
+};
+
+wifi_auth_mode_t WiFi_StrToAuth(char *str){
+	for(int i=0; i<11; i++){
+		if(strcmp(str, wifi_auth_str[i]) == 0){
+			return (wifi_auth_mode_t)i;
+		}
+	}
+	return WIFI_AUTH_OPEN;
+}
+
 static void WiFi_Event_Handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 
 static void WiFi_Event_Handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data){
