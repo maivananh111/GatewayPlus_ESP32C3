@@ -1,0 +1,99 @@
+	commandline_init(cmd_response);
+	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
+	asprintf(&cmd, "CLI_CMD_WIFI_SCAN: {}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_WIFI_CHECK_CONNECT: {}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_WIFI_CONN: {\"ssid\": \"Nhat Nam\", \"pass\": \"0989339608\", \"auth\": \"WIFI_AUTH_WPA2_PSK\"}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_WIFI_GETIP: {}");
+	commandline_process((void *)cmd); free(cmd);
+
+
+
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_NEW: {\"client_id\": 0}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_CONFIG: {\"url\": \"https://tt-iot-9b421-default-rtdb.asia-southeast1.firebasedatabase.app/.json\", "
+														 "\"transport_ssl\": 1, "
+														 "\"crt_bundle\": 1}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_INIT: {}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_HEADER: {\"key\": \"Content-Type\", \"value\": \"application/json\"}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_METHOD: {\"method\": \"HTTP_METHOD_PATCH\"}");
+	commandline_process((void *)cmd); free(cmd);
+
+	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
+
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"abcdef\", \"Humidity\": \"1111111.5\"}}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
+	commandline_process((void *)cmd); free(cmd);
+
+	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
+
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"115200.3\", \"Humidity\": \"159852.5\"}}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
+	commandline_process((void *)cmd); free(cmd);
+
+	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
+
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"456426551.3\", \"Humidity\": \"459794784957.5\"}}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
+	commandline_process((void *)cmd); free(cmd);
+
+	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
+
+
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_CLEAN: {}");
+	commandline_process((void *)cmd); free(cmd);
+
+
+/** ---------------------------------------------------------------------------- */
+
+
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_NEW: {\"client_id\": 0}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_CONFIG: {\"url\": \"https://tt-iot-9b421-default-rtdb.asia-southeast1.firebasedatabase.app/.json\", "
+														 "\"transport_ssl\": 1, "
+														 "\"crt_bundle\": 1}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_INIT: {}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_HEADER: {\"key\": \"Content-Type\", \"value\": \"application/json\"}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_METHOD: {\"method\": \"HTTP_METHOD_PATCH\"}");
+	commandline_process((void *)cmd); free(cmd);
+
+	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
+
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"abcdef\", \"Humidity\": \"1111111.5\"}}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
+	commandline_process((void *)cmd); free(cmd);
+
+	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
+
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"115200.3\", \"Humidity\": \"159852.5\"}}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
+	commandline_process((void *)cmd); free(cmd);
+
+	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
+
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"456426551.3\", \"Humidity\": \"459794784957.5\"}}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
+	commandline_process((void *)cmd); free(cmd);
+
+	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
+
+
+	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_CLEAN: {}");
+	commandline_process((void *)cmd); free(cmd);
+	asprintf(&cmd, "CLI_CMD_WIFI_DISCONN: {}");
+	commandline_process((void *)cmd); free(cmd);
+	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());

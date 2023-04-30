@@ -1,0 +1,14 @@
+# put here your custom config value
+menu "Command Control Configuration"
+config CMD_SUPPORT_WIFI_CONTROL
+    bool "WiFi control support."
+    default "0"
+    help
+	Support WiFi control command.
+
+config CMD_SUPPORT_HTTP_CLIENT
+    bool "HTTP client support."
+    default "0"
+    help
+	Support HTTP client command.
+endmenu

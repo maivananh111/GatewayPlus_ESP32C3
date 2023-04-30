@@ -404,16 +404,16 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/FireBase/cmake_install.cmake")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for the subdirectory.
   include("/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/WiFi/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/commandline/cmake_install.cmake")
+  include("/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/CMDControl/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/FireBase/cmake_install.cmake")
 endif()
 

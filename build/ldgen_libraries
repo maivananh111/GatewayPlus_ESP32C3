@@ -59,6 +59,6 @@
 /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/spiffs/libspiffs.a
 /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/wifi_provisioning/libwifi_provisioning.a
 /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/main/libmain.a
-/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/FireBase/libFireBase.a
 /home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/WiFi/libWiFi.a
-/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/commandline/libcommandline.a
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/CMDControl/libCMDControl.a
+/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/build/esp-idf/FireBase/libFireBase.a

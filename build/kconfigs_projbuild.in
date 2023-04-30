@@ -3,5 +3,5 @@ source "/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_app_format/Kconfi
 source "/home/anh/ProgramFile/esp32-idf/esp-idf/components/esp_rom/Kconfig.projbuild"
 source "/home/anh/ProgramFile/esp32-idf/esp-idf/components/esptool_py/Kconfig.projbuild"
 source "/home/anh/ProgramFile/esp32-idf/esp-idf/components/partition_table/Kconfig.projbuild"
+source "/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/CMDControl/Kconfig.projbuild"
 source "/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/WiFi/Kconfig.projbuild"
-source "/home/anh/Projects/CODE/ESP_IDF/GatewayPlus_ESP32C3/components/commandline/Kconfig.projbuild"

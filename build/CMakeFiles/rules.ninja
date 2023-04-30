@@ -1307,25 +1307,6 @@ rule C_STATIC_LIBRARY_LINKER____idf_main_
 #############################################
 # Rule for compiling CXX files.
 
-rule CXX_COMPILER____idf_FireBase_
-  depfile = $DEP_FILE
-  deps = gcc
-  command = /home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-g++ $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
-  description = Building CXX object $out
-
-
-#############################################
-# Rule for linking C static library.
-
-rule C_STATIC_LIBRARY_LINKER____idf_FireBase_
-  command = $PRE_LINK && /home/anh/.espressif/tools/cmake/3.24.0/bin/cmake -E rm -f $TARGET_FILE && /home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc $TARGET_FILE $LINK_FLAGS $in && /home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib $TARGET_FILE && $POST_BUILD
-  description = Linking C static library $TARGET_FILE
-  restat = $RESTAT
-
-
-#############################################
-# Rule for compiling CXX files.
-
 rule CXX_COMPILER____idf_WiFi_
   depfile = $DEP_FILE
   deps = gcc
@@ -1345,7 +1326,7 @@ rule C_STATIC_LIBRARY_LINKER____idf_WiFi_
 #############################################
 # Rule for compiling CXX files.
 
-rule CXX_COMPILER____idf_commandline_
+rule CXX_COMPILER____idf_CMDControl_
   depfile = $DEP_FILE
   deps = gcc
   command = /home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-g++ $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
@@ -1355,7 +1336,26 @@ rule CXX_COMPILER____idf_commandline_
 #############################################
 # Rule for linking C static library.
 
-rule C_STATIC_LIBRARY_LINKER____idf_commandline_
+rule C_STATIC_LIBRARY_LINKER____idf_CMDControl_
+  command = $PRE_LINK && /home/anh/.espressif/tools/cmake/3.24.0/bin/cmake -E rm -f $TARGET_FILE && /home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc $TARGET_FILE $LINK_FLAGS $in && /home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib $TARGET_FILE && $POST_BUILD
+  description = Linking C static library $TARGET_FILE
+  restat = $RESTAT
+
+
+#############################################
+# Rule for compiling CXX files.
+
+rule CXX_COMPILER____idf_FireBase_
+  depfile = $DEP_FILE
+  deps = gcc
+  command = /home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-g++ $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  description = Building CXX object $out
+
+
+#############################################
+# Rule for linking C static library.
+
+rule C_STATIC_LIBRARY_LINKER____idf_FireBase_
   command = $PRE_LINK && /home/anh/.espressif/tools/cmake/3.24.0/bin/cmake -E rm -f $TARGET_FILE && /home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc $TARGET_FILE $LINK_FLAGS $in && /home/anh/.espressif/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib $TARGET_FILE && $POST_BUILD
   description = Linking C static library $TARGET_FILE
   restat = $RESTAT

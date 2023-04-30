@@ -10,13 +10,19 @@
 #include "esp_log.h"
 #include "esp_err.h"
 
+#include "driver/gpio.h"
+#include "driver/uart.h"
+#include "hal/uart_types.h"
+
 #include "WiFi.h"
-#include "commandline.h"
 #include "FireBase.h"
+
+#include "CMDControl.h"
 
 const char *TAG = "main";
 
 FireBase fb;
+/*
 const char *root_cert_pem = (const char *)  "-----BEGIN CERTIFICATE-----\r\n"
 											"MIIDdTCCAl2gAwIBAgILBAAAAAABFUtaw5QwDQYJKoZIhvcNAQEFBQAwVzELMAkG\r\n"
 											"A1UEBhMCQkUxGTAXBgNVBAoTEEdsb2JhbFNpZ24gbnYtc2ExEDAOBgNVBAsTB1Jv\r\n"
@@ -38,126 +44,110 @@ const char *root_cert_pem = (const char *)  "-----BEGIN CERTIFICATE-----\r\n"
 											"DKqC5JlR3XC321Y9YeRq4VzW9v493kHMB65jUr9TU/Qr6cf9tveCX4XSQRjbgbME\r\n"
 											"HMUfpIBvFSDJ3gyICh3WZlXi/EjJKSZp4A==\r\n"
 											"-----END CERTIFICATE-----\r\n";
+*/
+#define BUF_SIZE (2048)
+#define RD_BUF_SIZE (BUF_SIZE)
+static QueueHandle_t uart_queue;
+static QueueHandle_t cmd_queue;
 
-void cmd_response(char *str){
-	if(str != NULL)
-		ESP_LOGW(TAG, "%s", str);
-}
-char *cmd;
+static void uart_event_task(void *);
+void cmd_response(char *str);
+static void cmd_process(void *);
+void shutdown_handler(void);
 
 extern "C" void app_main(void){
 	ESP_ERROR_CHECK(nvs_flash_init() );
 	ESP_ERROR_CHECK(esp_netif_init());
 	ESP_ERROR_CHECK(esp_event_loop_create_default());
 
+	esp_register_shutdown_handler(shutdown_handler);
 
 
-	commandline_init(cmd_response);
-	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
-	asprintf(&cmd, "CLI_CMD_WIFI_SCAN: {}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_WIFI_CHECK_CONNECT: {}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_WIFI_CONN: {\"ssid\": \"Nhat Nam\", \"pass\": \"0989339608\", \"auth\": \"WIFI_AUTH_WPA2_PSK\"}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_WIFI_GETIP: {}");
-	commandline_process((void *)cmd); free(cmd);
+    uart_config_t uart_config = {
+        .baud_rate = 115200,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .source_clk = UART_SCLK_DEFAULT,
+    };
 
+    uart_driver_install(UART_NUM_0, BUF_SIZE * 2, BUF_SIZE * 2, 20, &uart_queue, 0);
+    uart_param_config(UART_NUM_0, &uart_config);
+    uart_set_pin(UART_NUM_0, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
+    uart_write_bytes(UART_NUM_0, (const void *)"WIFI_CMD_RESTART: OK", (size_t)strlen("WIFI_CMD_RESTART: OK"));
 
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_NEW: {\"client_id\": 0}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_CONFIG: {\"url\": \"https://tt-iot-9b421-default-rtdb.asia-southeast1.firebasedatabase.app/.json\", "
-														 "\"transport_ssl\": 1, "
-														 "\"crt_bundle\": 1}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_CONNECT: {}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_HEADER: {\"key\": \"Content-Type\", \"value\": \"application/json\"}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_METHOD: {\"method\": \"HTTP_METHOD_PATCH\"}");
-	commandline_process((void *)cmd); free(cmd);
+    cmdcontrol_init(cmd_response);
 
-	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
-
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"abcdef\", \"Humidity\": \"1111111.5\"}}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
-	commandline_process((void *)cmd); free(cmd);
-
-	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
-
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"115200.3\", \"Humidity\": \"159852.5\"}}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
-	commandline_process((void *)cmd); free(cmd);
-
-	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
-
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"456426551.3\", \"Humidity\": \"459794784957.5\"}}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
-	commandline_process((void *)cmd); free(cmd);
-
-	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
-
-
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_DISCONNECT: {}");
-	commandline_process((void *)cmd); free(cmd);
-//	asprintf(&cmd, "CLI_CMD_WIFI_DISCONN: {}");
-//	commandline_process((void *)cmd); free(cmd);
-//	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
-
-
-/** ---------------------------------------------------------------------------- */
-
-
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_NEW: {\"client_id\": 0}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_CONFIG: {\"url\": \"https://tt-iot-9b421-default-rtdb.asia-southeast1.firebasedatabase.app/.json\", "
-														 "\"transport_ssl\": 1, "
-														 "\"crt_bundle\": 1}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_CONNECT: {}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_HEADER: {\"key\": \"Content-Type\", \"value\": \"application/json\"}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_METHOD: {\"method\": \"HTTP_METHOD_PATCH\"}");
-	commandline_process((void *)cmd); free(cmd);
-
-	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
-
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"abcdef\", \"Humidity\": \"1111111.5\"}}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
-	commandline_process((void *)cmd); free(cmd);
-
-	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
-
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"115200.3\", \"Humidity\": \"159852.5\"}}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
-	commandline_process((void *)cmd); free(cmd);
-
-	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
-
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_SET_DATA: {\"data\": {\"Temperature\": \"456426551.3\", \"Humidity\": \"459794784957.5\"}}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_REQUEST: {}");
-	commandline_process((void *)cmd); free(cmd);
-
-	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
-
-
-	asprintf(&cmd, "CLI_CMD_HTTP_CLIENT_DISCONNECT: {}");
-	commandline_process((void *)cmd); free(cmd);
-	asprintf(&cmd, "CLI_CMD_WIFI_DISCONN: {}");
-	commandline_process((void *)cmd); free(cmd);
-	ESP_LOGE(TAG, "Free heap = %lu", esp_get_free_heap_size());
+    xTaskCreate(uart_event_task, "uart_event_task", 4096, NULL, 12, NULL);
+    xTaskCreate(cmd_process, "cmd_process", 20480, NULL, 10, NULL);
 
     while (true) {
         vTaskDelay(1000);
-    	asprintf(&cmd, "CLI_CMD_RESTART: {}");
-    	commandline_process((void *)cmd); free(cmd);
     }
 }
+
+void cmd_response(char *str){
+	if(str != NULL){
+		uart_write_bytes((uart_port_t)UART_NUM_0, (const void *)str, (size_t)strlen(str));
+		vTaskDelay(50/portTICK_PERIOD_MS);
+	}
+
+}
+
+static void uart_event_task(void *){
+    uart_event_t event;
+
+
+    while(1) {
+        if(xQueueReceive(uart_queue, (void *)&event, (TickType_t)portMAX_DELAY)) {
+            switch(event.type) {
+                case UART_DATA:{
+                	char *buf = (char *)malloc(event.size + 1);
+                    uart_read_bytes(UART_NUM_0, buf, event.size, portMAX_DELAY);
+                    buf[event.size] = '\0';
+                    ESP_LOGW(TAG, "%s", buf);
+                    if(xQueueSend(cmd_queue, &buf, portMAX_DELAY) != pdTRUE){
+                    	ESP_LOGE(TAG, "Can't send item to queue");
+                    }
+                }
+				break;
+                default:
+                    ESP_LOGI(TAG, "uart0 event type: %d", event.type);
+				break;
+            }
+        }
+    }
+    vTaskDelete(NULL);
+}
+
+static void cmd_process(void *){
+	char *queue_data;
+
+	cmd_queue = xQueueCreate(5, sizeof(uint32_t));
+
+	while(1){
+		 if(xQueueReceive(cmd_queue, &queue_data, (TickType_t)portMAX_DELAY)) {
+			 cmdcontrol_process(queue_data);
+			 free(queue_data);
+		 }
+	}
+}
+
+void shutdown_handler(void){
+//	uart_write_bytes((uart_port_t)UART_NUM_0, (const void *)"ESP: RESTART", (size_t)strlen("ESP: RESTART"));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
