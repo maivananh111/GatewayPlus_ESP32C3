@@ -35,6 +35,8 @@ typedef struct{
 	char *data_str = NULL;
 } pkt_t;
 
+
+pkt_err_t json_merge(char *src, char *dest, char *sub);
 pkt_err_t json_get_object(char *src, pkt_json_t *dest, char *key);
 pkt_err_t json_release_object(pkt_json_t *json);
 pkt_err_t parse_packet(char *src, pkt_t *dest);

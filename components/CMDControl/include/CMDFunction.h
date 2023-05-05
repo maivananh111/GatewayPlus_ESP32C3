@@ -31,6 +31,7 @@ void cmdf_http_client_config(pkt_t *packet);
 void cmdf_http_client_init(pkt_t *packet);
 void cmdf_http_client_clean(pkt_t *packet);
 void cmdf_http_client_set_header(pkt_t *packet);
+void cmdf_http_client_set_url(pkt_t *packet);
 void cmdf_http_client_set_method(pkt_t *packet);
 void cmdf_http_client_set_data(pkt_t *packet);
 void cmdf_http_client_request(pkt_t *packet);

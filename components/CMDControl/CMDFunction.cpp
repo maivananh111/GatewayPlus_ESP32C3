@@ -32,7 +32,7 @@ extern void (*resp_pfunction)(char *resp);
 void cmdf_isconnected(void){
 	char *buf;
 
-	asprintf(&buf, "CLI_CMD_WIFI_CHECK_CONNECT: {\"isconnected\": %01d}", (int)WiFi_GetState());
+	asprintf(&buf, "WIFI_ISCONNECTED: {\"isconnected\":%01d}", (int)WiFi_GetState());
 	resp_pfunction((char *)buf);
 	free(buf);
 }
@@ -42,13 +42,13 @@ void cmdf_get_ip(void){
 	wifi_ipinfo_t ipinfo;
 	if(WiFi_STA_Get_IPInfo(&ipinfo) == ESP_OK){
 		/** handle response IP */
-		asprintf(&buf, "CLI_CMD_WIFI_GETIP: {\"ip\": \"%s\", \"netmask\": \"%s\", \"gateway\": \"%s\"}",
+		asprintf(&buf, "WIFI_GETIP: {\"ip\":\"%s\",\"netmask\":\"%s\",\"gateway\":\"%s\"}",
 				ipinfo.ip, ipinfo.netmask, ipinfo.gateway);
 
 		WiFi_STA_Release_IPInfo(&ipinfo);
 	}
 	else{
-		asprintf(&buf, "CLI_CMD_WIFI_GETIP: {\"ip\": \"0.0.0.0\", \"netmask\": \"0.0.0.0\", \"gateway\": \"0.0.0.0\"}");
+		asprintf(&buf, "WIFI_GETIP: {\"ip\":\"0.0.0.0\",\"netmask\":\"0.0.0.0\",\"gateway\":\"0.0.0.0\"}");
 	}
 
 	resp_pfunction(buf);
@@ -66,19 +66,19 @@ void cmdf_wifi_scan(void){
 		total_ssid_len += strlen(info.name);
 	}
 	/** Calculate total length */
-	int total_len = strlen("CLI_CMD_WIFI_SCAN: {")+ total_ssid_len + (strlen("\"Noxx\": {\"ssid\": \"\", ") + strlen("\"rssi\": }, ") + 3) * num_wifi;
+	int total_len = strlen("WIFI_SCAN: {")+ total_ssid_len + (strlen("\"Noxx\":{\"ssid\":\"\",") + strlen("\"rssi\":},") + 3) * num_wifi;
 	char *ssid_str = (char *)malloc(total_len);
 	if(ssid_str == NULL){
 		ESP_LOGE(TAG, "Fail to allocate memory");
 		return;
 	}
 	memset(ssid_str, '\0', total_len);
-	memcpy(ssid_str, "CLI_CMD_WIFI_SCAN: {", strlen("CLI_CMD_WIFI_SCAN: {"));
+	memcpy(ssid_str, "WIFI_SCAN: {", strlen("WIFI_SCAN: {"));
 
 	for(uint8_t i=0; i<num_wifi; i++){
 		WiFi_STA_Scan_Get_Info(i, &info);
 		char *temp;
-		asprintf(&temp, "\"No%02d\": {\"ssid\": \"%s\", \"rssi\": %03d}, ", i+1, info.name, info.rssi);
+		asprintf(&temp, "\"No%02d\":{\"ssid\":\"%s\",\"rssi\":%03d},", i+1, info.name, info.rssi);
 		strcat(ssid_str, temp);
 		ESP_LOGE(TAG, "%s", temp);
 		free(temp);
@@ -118,7 +118,7 @@ void cmdf_wifi_connect(pkt_t *packet){
 		WiFi_STA_Connect(ssid, pass, WiFi_StrToAuth(auth));
 	};
 
-	resp_pfunction("CLI_CMD_WIFI_CONN: OK");
+	resp_pfunction("WIFI_CONN: OK");
 }
 
 void cmdf_wifi_disconnect(void){
@@ -127,7 +127,7 @@ void cmdf_wifi_disconnect(void){
 	}
 
 	ESP_LOGI(TAG, "WiFi disconnected");
-	resp_pfunction("CLI_CMD_WIFI_DISCONN: OK");
+	resp_pfunction("WIFI_DISCONN: OK");
 }
 
 #endif /* CONFIG_CMD_SUPPORT_WIFI_CONTROL */
@@ -140,6 +140,7 @@ static esp_http_client_handle_t client;
 static esp_http_client_config_t client_config;
 static EventGroupHandle_t http_client_resp_bit = NULL;
 static char *req_data = NULL;
+static char *url, *req_url;
 
 
 static const char *http_client_method_str[] = {
@@ -167,20 +168,23 @@ static const char *http_client_method_str[] = {
 esp_err_t cmdf_http_client_event_handler(esp_http_client_event_handle_t evt);
 
 void cmdf_http_client_new(pkt_t *packet){
+	if(WiFi_GetState() == WIFI_CONNECT_FAILED) esp_restart();
 	pkt_json_t json;
 	pkt_err_t err;
 
 	if(http_client_resp_bit == NULL) http_client_resp_bit = xEventGroupCreate();
-	resp_pfunction("WIFI_CMD_HTTP_CLIENT_NEW: OK");
+	resp_pfunction("WIFI_HTTP_CLIENT_NEW: OK");
 }
 
 void cmdf_http_client_config(pkt_t *packet){
+	if(WiFi_GetState() == WIFI_CONNECT_FAILED) esp_restart();
 	pkt_json_t json;
 	pkt_err_t err;
 
 	/** URL */
 	err = json_get_object(packet->data_str, &json, "url");
 	if(err == PKT_ERR_OK) {
+		asprintf(&url, "%s", json.value);
 		asprintf((char **)&client_config.url, "%s", json.value);
 		ESP_LOGW(TAG, "HTTP Set url %s", client_config.url);
 		json_release_object(&json);
@@ -244,18 +248,20 @@ void cmdf_http_client_config(pkt_t *packet){
 
 	/** Event handler */
 	client_config.event_handler = cmdf_http_client_event_handler;
-	resp_pfunction("WIFI_CMD_HTTP_CLIENT_CONFIG: OK");
+	resp_pfunction("WIFI_HTTP_CLIENT_CONFIG: OK");
 }
 
 void cmdf_http_client_init(pkt_t *packet){
+	if(WiFi_GetState() == WIFI_CONNECT_FAILED) esp_restart();
 	pkt_json_t json;
 	pkt_err_t err;
 
 	client = esp_http_client_init(&client_config);
-	resp_pfunction("CLI_CMD_HTTP_CLIENT_INIT: OK");
+	resp_pfunction("WIFI_HTTP_CLIENT_INIT: OK");
 }
 
 void cmdf_http_client_clean(pkt_t *packet){
+	if(WiFi_GetState() == WIFI_CONNECT_FAILED) esp_restart();
 	pkt_json_t json;
 	pkt_err_t err;
 
@@ -267,10 +273,11 @@ void cmdf_http_client_clean(pkt_t *packet){
 	if(client_config.password != NULL) free((char *)client_config.password);
 	if(client_config.user_agent != NULL) free((char *)client_config.user_agent);
 
-	resp_pfunction("CLI_CMD_HTTP_CLIENT_CLEAN: OK");
+	resp_pfunction("WIFI_HTTP_CLIENT_CLEAN: OK");
 }
 
 void cmdf_http_client_set_header(pkt_t *packet){
+	if(WiFi_GetState() == WIFI_CONNECT_FAILED) esp_restart();
 	pkt_json_t json;
 	pkt_err_t err;
 	char *key, *value;
@@ -278,12 +285,12 @@ void cmdf_http_client_set_header(pkt_t *packet){
 	/** Key */
 	err = json_get_object(packet->data_str, &json, "key");
 	if(err == PKT_ERR_OK) asprintf(&key, "%s", json.value);
-	else resp_pfunction("CLI_CMD_HTTP_CLIENT_SET_HEADER: ERR");
+	else resp_pfunction("WIFI_HTTP_CLIENT_SET_HEADER: ERR");
 	json_release_object(&json);
 	/** Value */
 	err = json_get_object(packet->data_str, &json, "value");
 	if(err == PKT_ERR_OK) asprintf(&value, "%s", json.value);
-	else resp_pfunction("CLI_CMD_HTTP_CLIENT_SET_HEADER: ERR");
+	else resp_pfunction("WIFI_HTTP_CLIENT_SET_HEADER: ERR");
 	json_release_object(&json);
 
 	esp_http_client_set_header(client, key, value);
@@ -291,10 +298,11 @@ void cmdf_http_client_set_header(pkt_t *packet){
 	if(key) free(key);
 	if(value) free(value);
 
-	resp_pfunction("CLI_CMD_HTTP_CLIENT_SET_HEADER: OK");
+	resp_pfunction("WIFI_HTTP_CLIENT_SET_HEADER: OK");
 }
 
 void cmdf_http_client_set_method(pkt_t *packet){
+	if(WiFi_GetState() == WIFI_CONNECT_FAILED) esp_restart();
 	pkt_json_t json;
 	pkt_err_t err;
 	int i = 0;
@@ -307,48 +315,72 @@ void cmdf_http_client_set_method(pkt_t *packet){
 		}
 
 		esp_http_client_set_method(client, (esp_http_client_method_t)i);
-		resp_pfunction("CLI_CMD_HTTP_CLIENT_SET_METHOD: OK");
+		resp_pfunction("WIFI_HTTP_CLIENT_SET_METHOD: OK");
 	}
 	else{
-		resp_pfunction("CLI_CMD_HTTP_CLIENT_SET_METHOD: ERR");
+		resp_pfunction("WIFI_HTTP_CLIENT_SET_METHOD: ERR");
+	}
+	json_release_object(&json);
+}
+
+void cmdf_http_client_set_url(pkt_t *packet){
+	if(WiFi_GetState() == WIFI_CONNECT_FAILED) esp_restart();
+	pkt_json_t json;
+	pkt_err_t err;
+
+	/** Get method */
+	err = json_get_object(packet->data_str, &json, "url");
+	if(err == PKT_ERR_OK){
+		if(req_url != NULL) {
+			free(req_url);
+			req_url = NULL;
+		}
+
+		asprintf(&req_url, "%s%s", url, json.value);
+		esp_http_client_set_url(client, req_url);
+		resp_pfunction("WIFI_HTTP_CLIENT_SET_METHOD: OK");
+	}
+	else{
+		resp_pfunction("WIFI_HTTP_CLIENT_SET_METHOD: ERR");
 	}
 	json_release_object(&json);
 }
 
 void cmdf_http_client_set_data(pkt_t *packet){
+	if(WiFi_GetState() == WIFI_CONNECT_FAILED) esp_restart();
 	pkt_json_t json;
 	pkt_err_t err;
 
 	/** Data */
 	err = json_get_object(packet->data_str, &json, "data");
 	if(err == PKT_ERR_OK) {
+		if(req_data != NULL) {
+			free(req_data);
+			req_data = NULL;
+		}
+
 		asprintf(&req_data, "%s", json.value);
 		esp_http_client_set_post_field(client, req_data, strlen(req_data));
 		json_release_object(&json);
-		resp_pfunction("CLI_CMD_HTTP_CLIENT_SET_DATA: OK");
+		resp_pfunction("WIFI_HTTP_CLIENT_SET_DATA: OK");
 	}
 	else
-		resp_pfunction("CLI_CMD_HTTP_CLIENT_SET_DATA: ERR");
+		resp_pfunction("WIFI_HTTP_CLIENT_SET_DATA: ERR");
 }
 
 void cmdf_http_client_request(pkt_t *packet){
+	if(WiFi_GetState() == WIFI_CONNECT_FAILED) esp_restart();
 	pkt_json_t json;
 	pkt_err_t err;
 
 	esp_http_client_perform(client);
-
-	if(req_data != NULL) {
-		free(req_data);
-		req_data = NULL;
-	}
-
 
     EventBits_t bits = xEventGroupWaitBits(http_client_resp_bit, HTTP_WAIT_RESP_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
     if(bits & HTTP_WAIT_RESP_BIT){
     	xEventGroupClearBits(http_client_resp_bit, HTTP_WAIT_RESP_BIT);
     }
     else
-    	resp_pfunction("CLI_CMD_HTTP_CLIENT_REQUEST: ERR");
+    	resp_pfunction("WIFI_HTTP_CLIENT_REQUEST: ERR");
 }
 
 esp_err_t cmdf_http_client_event_handler(esp_http_client_event_handle_t evt){
@@ -374,9 +406,9 @@ esp_err_t cmdf_http_client_event_handler(esp_http_client_event_handle_t evt){
 			memcpy(resp_data, (char *)evt->data, evt->data_len);
 			resp_data[evt->data_len] = '\0';
 
-			int total_len = strlen("WIFI_CMD_HTTP_CLIENT_RESPONSE: {\"status\": , \"data\": }") + 3 + strlen(resp_data);
+			int total_len = strlen("WIFI_HTTP_CLIENT_RESPONSE: {\"status\":,\"data\":}") + 3 + strlen(resp_data);
 			char *full_resp = (char *)malloc(total_len+1);
-			sprintf(full_resp, "WIFI_CMD_HTTP_CLIENT_RESPONSE: {\"status\": %03d, \"data\": %s}", status_code, resp_data);
+			sprintf(full_resp, "WIFI_HTTP_CLIENT_RESPONSE: {\"status\":%03d,\"data\":%s}", status_code, resp_data);
 			full_resp[total_len] = '\0';
 
 			if(status_code != 200) ESP_LOGI("HTTP", "Responsed status: %d", status_code);

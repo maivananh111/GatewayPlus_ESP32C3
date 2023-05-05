@@ -45,8 +45,17 @@ const char *root_cert_pem = (const char *)  "-----BEGIN CERTIFICATE-----\r\n"
 											"HMUfpIBvFSDJ3gyICh3WZlXi/EjJKSZp4A==\r\n"
 											"-----END CERTIFICATE-----\r\n";
 */
-#define BUF_SIZE (2048)
-#define RD_BUF_SIZE (BUF_SIZE)
+#define BUF_SIZE (4096)
+
+char *full_struct = (char *)"{\"Kho1\":{"\
+										"\"data\":{\"temp\":36.8,\"humi\":81.2,\"current\":15,\"time\":\"220050 050323\"}"\
+									   "}"\
+							"}";
+char *data_struct = (char *)"\"data\":{\"temp\":36.8,\"humi\":81.2,\"current\":15,\"time\":\"220050 050323\"}";
+char *ctrl_struct = (char *)"\"control\":{\"relay1\":1,\"relay2\":0,\"relay3\":0,\"relay4\":1}";
+char *sett_struct = (char *)"\"settings\":{\"mode\":1,\"type\":1,\"smax_temp\":38.5,\"smin_temp\":37.5,\"stime_start\":\"10:25:15\",\"stime_stop\":\"11:30:00\"}";
+char *prop_struct = (char *)"\"properties\":{\"address\":0xABCD1234,\"name\":\"Kho1\"}";
+
 static QueueHandle_t uart_queue;
 static QueueHandle_t cmd_queue;
 
@@ -62,7 +71,6 @@ extern "C" void app_main(void){
 
 	esp_register_shutdown_handler(shutdown_handler);
 
-
     uart_config_t uart_config = {
         .baud_rate = 115200,
         .data_bits = UART_DATA_8_BITS,
@@ -76,11 +84,14 @@ extern "C" void app_main(void){
     uart_param_config(UART_NUM_0, &uart_config);
     uart_set_pin(UART_NUM_0, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
-    uart_write_bytes(UART_NUM_0, (const void *)"WIFI_CMD_RESTART: OK", (size_t)strlen("WIFI_CMD_RESTART: OK"));
+    ESP_LOGW(TAG, "WiFi Module Starting............................");
+    uart_write_bytes(UART_NUM_0, (const void *)"WIFI_RESTART: OK", (size_t)strlen("WIFI_RESTART: OK"));
 
+//    UART_FIFO_LEN
+//	UART_FULL_THRESH_DEFAULT
     cmdcontrol_init(cmd_response);
 
-    xTaskCreate(uart_event_task, "uart_event_task", 4096, NULL, 12, NULL);
+    xTaskCreate(uart_event_task, "uart_event_task", 10240, NULL, 12, NULL);
     xTaskCreate(cmd_process, "cmd_process", 20480, NULL, 10, NULL);
 
     while (true) {
@@ -91,6 +102,7 @@ extern "C" void app_main(void){
 void cmd_response(char *str){
 	if(str != NULL){
 		uart_write_bytes((uart_port_t)UART_NUM_0, (const void *)str, (size_t)strlen(str));
+		ESP_LOGI(TAG, "Sent %s", str);
 		vTaskDelay(50/portTICK_PERIOD_MS);
 	}
 
@@ -99,20 +111,22 @@ void cmd_response(char *str){
 static void uart_event_task(void *){
     uart_event_t event;
 
-
     while(1) {
         if(xQueueReceive(uart_queue, (void *)&event, (TickType_t)portMAX_DELAY)) {
             switch(event.type) {
                 case UART_DATA:{
-                	char *buf = (char *)malloc(event.size + 1);
-                    uart_read_bytes(UART_NUM_0, buf, event.size, portMAX_DELAY);
-                    buf[event.size] = '\0';
+                	int length = 0;
+                	uart_get_buffered_data_len(UART_NUM_0, (size_t *)&length);
+                	char *buf = (char *)malloc(length + 1);
+                    uart_read_bytes(UART_NUM_0, buf, length, portMAX_DELAY);
+                    buf[length] = '\0';
                     ESP_LOGW(TAG, "%s", buf);
                     if(xQueueSend(cmd_queue, &buf, portMAX_DELAY) != pdTRUE){
                     	ESP_LOGE(TAG, "Can't send item to queue");
                     }
                 }
 				break;
+
                 default:
                     ESP_LOGI(TAG, "uart0 event type: %d", event.type);
 				break;
